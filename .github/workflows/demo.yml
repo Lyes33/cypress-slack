@@ -1,0 +1,28 @@
+name: run cypress test with github action 
+
+on: [push, workflow_dispatch]
+
+jobs: 
+  cypress-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+      - name: run cypress test
+        run: npx cypress run --e2e --browser chrome
+      - name: publish reporter
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-reporter
+          path: cypress/reports/html
+      - name: slack notifaction
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Lyes33
+          SLACK_TITLE: Tests regression
+          SLACK_MESSAGE: 'Test report https://github.com/Lyes33/custom-giAct/actions/runs/${{github.run_id}}'
+          SLACK_COLOR: ${{ job.status }}
